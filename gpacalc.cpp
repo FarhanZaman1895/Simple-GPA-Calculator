@@ -1,4 +1,6 @@
 // Includes
+#include <algorithm>
+#include <iomanip>
 #include <iostream>
 #include <string>
 #include <vector>
@@ -6,7 +8,7 @@
 // Data Types
 class Grade
 {
-    // Properties
+    // Private Properties
 private:
     std::string courseName;
     std::string letterGrade;
@@ -27,9 +29,11 @@ public:
 
     void displayGrade()
     {
-        std::cout << "Course: " << courseName << ", Letter Grade: "
-            << letterGrade << ", Number Grade: " << 
-            numberGrade << ", Units: " << units << "\n";
+        std::cout << "Course: " << courseName 
+            << ", Letter Grade: " << std::fixed << std::setprecision(1) << letterGrade
+            << ", Number Grade: " << std::fixed << std::setprecision(1) << numberGrade
+            << ", Units: " << units
+            << "\n";
     }
 
     void changeGrade(std::string newGrade)
@@ -43,6 +47,11 @@ public:
         return numberGrade;
     }
 
+    std::string getName()
+    {
+        return courseName;
+    }
+
 private:
     float gradeToNum(std::string letter)
     {
@@ -52,7 +61,7 @@ private:
         // Idk how to make this more efficient
         if (letter.compare("A") == 0 || letter.compare("A+") == 0)
         {
-            gpaVal = 4;
+            gpaVal = 4.0;
         } else if (letter.compare("A-") == 0)
         {
             gpaVal = 3.7;
@@ -95,8 +104,12 @@ private:
 // Predefining Functions
 int mainMenu();
 int menuInput(int min, int max);
-void displayGrades(std::vector<Grade> gradeArr);
-void addGrade(std::vector<Grade> gradeArr);
+void displayGrades(std::vector<Grade> &gradeArr);
+void addClass(std::vector<Grade> &gradeArr);
+void removeClass(std::vector<Grade> &gradeArr);
+void editClassCheck(std::vector<Grade> &gradeArr);
+void editClass(Grade &course);
+int editClassMenu();
 
 // Main Function
 int main(int argc, char *argv[])
@@ -116,7 +129,13 @@ int main(int argc, char *argv[])
             displayGrades(gradeArr);
         } else if (choice == 2)
         {
-            addGrade(gradeArr);
+            addClass(gradeArr);
+        } else if (choice == 3)
+        {
+            removeClass(gradeArr);
+        } else if (choice == 4)
+        {
+            editClassCheck(gradeArr);
         }
 
     } while (choice != 0);
@@ -132,7 +151,7 @@ int mainMenu()
         << "1. Display Classes\n" 
         << "2. Add Class\n" 
         << "3. Remove Class\n"
-        << "4. Edit Class Grade\n"
+        << "4. Edit Class\n"
         << "5. Calculate Average\n";
 
     return menuInput(0, 5);
@@ -163,7 +182,7 @@ int menuInput(int min, int max)
     return choiceInt;
 }
 
-void displayGrades(std::vector<Grade> gradeArr)
+void displayGrades(std::vector<Grade> &gradeArr)
 {
     if (gradeArr.size() > 0)
     {
@@ -173,16 +192,26 @@ void displayGrades(std::vector<Grade> gradeArr)
         }
     } else
     {
-        std::cout << "There are no courses" << "\n";
+        std::cout << "There are no courses." << "\n";
     }
 }
 
-void addGrade(std::vector<Grade> gradeArr)
+void addClass(std::vector<Grade> &gradeArr)
 {
     std::string courseName, letterGrade;
     float units;
     std::cout << "Please add a course name: ";
     std::cin >> courseName;
+
+    for (int i = 0; i < gradeArr.size(); i++)
+    {
+        if (courseName.compare(gradeArr[i].getName()) == 0)
+        {
+            std::cout << "That course name is already in use.\n";
+            return;
+        }
+    }
+
     std::cout << "Please add letter grade: ";
     std::cin >> letterGrade;
     std::cout << "Please add course units: ";
@@ -190,4 +219,67 @@ void addGrade(std::vector<Grade> gradeArr)
 
     Grade tempGrade {courseName, letterGrade, units};
     gradeArr.push_back(tempGrade);
+}
+
+void removeClass(std::vector<Grade> &gradeArr)
+{
+    std::string courseName;
+    std::cout << "Please choose a course to remove: ";
+    std::cin >> courseName;
+
+    for (int i = 0; i < gradeArr.size(); i++)
+    {
+        if (courseName.compare(gradeArr[i].getName()) == 0)
+        {
+            gradeArr.erase(gradeArr.begin() + i);
+            std::cout << "The course, " << courseName << ", has successfully been removed.\n";
+            return;
+        }
+    }
+
+    std::cout << "No such course has been found.\n";
+}
+
+void editClassCheck(std::vector<Grade> &gradeArr)
+{
+    std::string courseName;
+    std::cout << "Please choose a course to edit: ";
+    std::cin >> courseName;
+
+    for (int i = 0; i < gradeArr.size(); i++)
+    {
+        if (courseName.compare(gradeArr[i].getName()) == 0)
+        {
+            editClass(gradeArr[i]);
+            return;
+        }
+    }
+
+    std::cout << "No such course has been found.\n";
+}
+
+void editClass(Grade &course)
+{
+    int choice;
+
+    do 
+    {
+        std::cout << std::endl;
+        choice = editClassMenu();
+        if (choice == 1)
+        {
+            
+        }
+
+    } while (choice != 0);
+}
+
+int editClassMenu()
+{
+    std::cout << "0. Return to main menu\n"
+        << "1. View selected course\n"
+        << "2. Edit course grade\n"
+        << "3. Edit course units\n";
+
+    return menuInput(0, 3);
 }
